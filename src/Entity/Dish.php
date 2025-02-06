@@ -8,8 +8,12 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['dish:read']],
+    denormalizationContext: ['groups' => ['dish:write']]
+)]
 #[ORM\Entity(repositoryClass: DishRepository::class)]
 class Dish
 {
@@ -27,13 +31,14 @@ class Dish
     #[ORM\Column]
     private ?int $cookingDuration = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
     /**
      * @var Collection<int, DishIngredient>
      */
-    #[ORM\OneToMany(targetEntity: DishIngredient::class, mappedBy: 'dish')]
+    #[ORM\OneToMany(mappedBy: "dish", targetEntity: DishIngredient::class, cascade: ["persist"])]
+    #[Groups(["dish:read", "dish:write"])]
     private Collection $dishIngredients;
 
     /**

@@ -29,7 +29,7 @@ class Ingredient
     #[ORM\Column(length: 255)]
     private ?string $imageUrl = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
     /**

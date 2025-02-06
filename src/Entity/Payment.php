@@ -27,7 +27,7 @@ class Payment
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
     private ?string $amount = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int
