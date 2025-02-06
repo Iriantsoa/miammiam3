@@ -17,7 +17,7 @@ class DishIngredient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["dishIngredient:read", "dishIngredient:write", "dish:read"])]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Dish::class, inversedBy: 'dishIngredients')]
@@ -27,11 +27,11 @@ class DishIngredient
 
     #[ORM\ManyToOne(targetEntity: Ingredient::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["dishIngredient:read", "dishIngredient:write", "dish:read"])]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?Ingredient $ingredient = null;
 
     #[ORM\Column]
-    #[Groups(["dishIngredient:read", "dishIngredient:write", "dish:read"])]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?int $quantity = null;
 
     public function getId(): ?int
