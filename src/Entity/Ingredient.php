@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use App\Repository\IngredientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,6 +31,17 @@ class Ingredient
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
+
+    /**
+     * @var Collection<int, DishIngredient>
+     */
+    #[ORM\OneToMany(targetEntity: DishIngredient::class, mappedBy: 'ingredient')]
+    private Collection $dishIngredients;
+
+    public function __construct()
+    {
+        $this->dishIngredients = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -76,6 +89,36 @@ class Ingredient
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DishIngredient>
+     */
+    public function getDishIngredients(): Collection
+    {
+        return $this->dishIngredients;
+    }
+
+    public function addDishIngredient(DishIngredient $dishIngredient): static
+    {
+        if (!$this->dishIngredients->contains($dishIngredient)) {
+            $this->dishIngredients->add($dishIngredient);
+            $dishIngredient->setIngredient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDishIngredient(DishIngredient $dishIngredient): static
+    {
+        if ($this->dishIngredients->removeElement($dishIngredient)) {
+            // set the owning side to null (unless already changed)
+            if ($dishIngredient->getIngredient() === $this) {
+                $dishIngredient->setIngredient(null);
+            }
+        }
+
         return $this;
     }
 }

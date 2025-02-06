@@ -1,0 +1,800 @@
+Below is a comprehensive README document that you can share with your team. It covers:
+
+1. A detailed list of every table (entity) with their columns and notes.  
+2. Milestones and scenarios classified as independent and non‐independent, as well as a version sorted by the order in which they need to be implemented.  
+3. Every API endpoint you need to create, with details on the request/response JSON payloads. You can copy/paste this as your project documentation.
+
+---
+
+# Project API & Database Design Documentation
+
+---
+
+## 1. Database Tables
+
+Below is a list of all database tables (entities) along with their column details.
+
+### 1.1. User (Customer)
+- **Table Name:** `user`
+- **Purpose:** Stores customer accounts authenticated via Firebase.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`firebaseUid`**: *String, Not Null, Unique*  
+    _The unique Firebase identifier for the customer._
+  - **`email`**: *String, Not Null, Unique*  
+    _Customer email address._
+  - **`name`**: *String, Not Null*  
+    _Display name._
+  - **`createdAt`**: *DateTime*  
+    _Timestamp of account creation._
+
+---
+
+### 1.2. Admin
+- **Table Name:** `admin`
+- **Purpose:** Stores administrator accounts (with hard-coded credentials).
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`email`**: *String, Not Null, Unique.*
+  - **`password`**: *String, Not Null*  
+    _Hashed password._
+  - **`name`**: *String*  
+    _Display name._
+  - **`createdAt`**: *DateTime*  
+    _Timestamp of creation._
+
+---
+
+### 1.3. Ingredient
+- **Table Name:** `ingredient`
+- **Purpose:** Stores ingredients with their stock and image URL.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`name`**: *String, Not Null, Unique*  
+    _Name of the ingredient._
+  - **`stockQuantity`**: *Integer, Not Null*  
+    _The available stock count (e.g., number of breads, onions, etc.)._
+  - **`imageUrl`**: *String, Nullable*  
+    _URL to the ingredient’s image._
+  - **`createdAt`**: *DateTime*  
+    _Record creation timestamp._
+
+---
+
+### 1.4. Dish
+- **Table Name:** `dish`
+- **Purpose:** Stores the available dishes (menu items).
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`name`**: *String, Not Null, Unique.*
+  - **`price`**: *Decimal, Not Null*  
+    _Price of the dish._
+  - **`cookingDuration`**: *Integer, Not Null*  
+    _Cooking duration in seconds (or your chosen unit) used by the kitchen simulation._
+  - **`createdAt`**: *DateTime*  
+    _Timestamp of creation._
+- **Note:** Dishes do **not** include an image URL.
+
+---
+
+### 1.5. DishIngredient
+- **Table Name:** `dish_ingredient`
+- **Purpose:** Junction table representing the many-to-many relationship between dishes and ingredients.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*  
+    _Alternatively, you could use a composite primary key (`dish_id`, `ingredient_id`)._
+  - **`dish`**: *Association (ManyToOne) to `dish`, Not Null.*
+  - **`ingredient`**: *Association (ManyToOne) to `ingredient`, Not Null.*
+  - **`quantityRequired`**: *Integer, Not Null*  
+    _Number of units required (e.g., 1 bread, 2 onions)._
+
+---
+
+### 1.6. Order
+- **Table Name:** `order`
+- **Purpose:** Represents finalized customer orders (saved after payment).
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`user`**: *Association (ManyToOne) to `user`, Not Null.*
+  - **`totalAmount`**: *Decimal, Not Null*  
+    _Calculated total for the order._
+  - **`status`**: *String or ENUM, Not Null*  
+    _Allowed values: `paid`, `in_preparation`, `ready`, `complete`._
+  - **`createdAt`**: *DateTime*  
+    _Timestamp when the order was finalized._
+  - **`updatedAt`**: *DateTime*  
+    _Updated whenever the order status changes._
+
+---
+
+### 1.7. OrderItem
+- **Table Name:** `order_item`
+- **Purpose:** Represents each dish (with quantity) within an order.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`order`**: *Association (ManyToOne) to `order`, Not Null.*
+  - **`dish`**: *Association (ManyToOne) to `dish`, Not Null.*
+  - **`quantity`**: *Integer, Not Null*  
+    _How many of this dish are in the order._
+
+---
+
+### 1.8. Payment
+- **Table Name:** `payment`
+- **Purpose:** Logs the (simulated) payment for an order.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`order`**: *Association (ManyToOne) to `order`, Not Null.*
+  - **`user`**: *Association (ManyToOne) to `user`, Not Null.*
+  - **`amount`**: *Decimal, Not Null.*
+  - **`createdAt`**: *DateTime*  
+    _Timestamp when the payment was recorded._
+- **Note:** Payment is always successful; no status column is needed.
+
+---
+
+### 1.9. KitchenItem
+- **Table Name:** `kitchen_item`
+- **Purpose:** Represents each individual dish unit that must be processed (cooked/delivered) in the kitchen simulation.
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`order`**: *Association (ManyToOne) to `order`, Not Null.*
+  - **`dish`**: *Association (ManyToOne) to `dish`, Not Null.*
+  - **`status`**: *String or ENUM, Not Null*  
+    _Allowed values: `waiting`, `cooking`, `cooked`, `delivered`._
+  - **`startedAt`**: *DateTime, Nullable*  
+    _Set when cooking starts._
+  - **`finishedAt`**: *DateTime, Nullable*  
+    _Set when the dish is finished._
+
+---
+
+### 1.10. Notification
+- **Table Name:** `notification`
+- **Purpose:** Stores push notifications to be sent to customers (e.g., when an order is ready).
+- **Columns:**
+  - **`id`**: *Integer, Auto-increment, Primary key.*
+  - **`user`**: *Association (ManyToOne) to `user`, Not Null.*
+  - **`message`**: *String, Not Null*  
+    _Content of the notification._
+  - **`status`**: *String or ENUM, Not Null*  
+    _Allowed values: `sent`, `read`._
+  - **`createdAt`**: *DateTime*  
+    _Timestamp of notification creation._
+
+---
+
+## 2. Milestones & Scenarios
+
+Below are two classifications of our milestones and scenarios.
+
+### 2.1. Classification: Independent vs. Non-Independent
+
+#### **Independent Scenarios**  
+These scenarios do not rely on other parts of the system to be fully in place.
+
+- **Authentication:**
+  - **User Registration:** Customer signs up via mobile (Firebase integration).
+  - **User Login:** Customer logs in using Firebase.
+  - **Admin Login:** Admin logs in using hard-coded credentials.
+- **Catalog Management:**
+  - **Display Dishes (Mobile):** Retrieve and display dishes.
+  - **Admin Dish Management:** CRUD operations for dishes.
+  - **List Ingredients (Admin):** Read-only view of ingredients.
+  - **List Users (Admin):** Retrieve list of customers.
+- **Payment (Simulated):**
+  - **Record Payment:** Log payment (always successful).
+
+#### **Non-Independent (Dependent) Scenarios**  
+These require order processing and/or integration with the kitchen simulation.
+
+- **Order Creation & Payment:**
+  - **Build and Review Order:** Customer selects and reviews dishes.
+  - **Finalize Order & Simulate Payment:** Save order, order items, and payment.
+  - **Generate Kitchen Tasks:** Create `kitchen_item` records for each order item.
+- **Kitchen Simulation:**
+  - **Fetch Kitchen Tasks:** Game retrieves pending kitchen tasks.
+  - **Start Kitchen Task:** Mark task as `cooking` (when a chef picks it up).
+  - **Process Ingredient Addition:** Validate and update ingredient stock.
+  - **Complete Cooking & Delivery:** Mark task as `cooked`/`delivered`.
+- **Order Completion & Notification:**
+  - **Update Order Status & Notify:** When all tasks for an order are delivered, update status to `ready` and send notification.
+  - **Confirm Order Pickup:** Customer confirms pickup, updating order status to `complete`.
+
+---
+
+### 2.2. Implementation Order (When It Needs to Be Done)
+
+#### **Phase 1 – Foundation (Independent)**
+1. **Authentication:**  
+   - User Registration (`POST /api/auth/register`)  
+   - User Login (`POST /api/auth/login`)  
+   - Admin Login (`POST /api/admin/login`)
+2. **Catalog Management:**  
+   - List Dishes (`GET /api/dishes`)  
+   - Admin Dish CRUD (`GET/POST/PUT/DELETE /api/admin/dishes`)  
+   - List Ingredients (`GET /api/admin/ingredients`)  
+   - List Users (`GET /api/admin/users`)
+3. **Simulated Payment:**  
+   - Record Payment (`POST /api/payments`)
+
+#### **Phase 2 – Order Creation (Dependent)**
+4. **Order Creation & Review:**  
+   - Create Order (`POST /api/orders`)  
+   - Retrieve Customer Orders (`GET /api/orders` and `GET /api/orders/{id}`)
+   - Admin Order Management (`GET/PUT/DELETE /api/admin/orders` and Stats: `GET /api/admin/orders/stats`)
+5. **Kitchen Task Generation:**  
+   - Automatically generate `kitchen_item` records after order creation.
+
+#### **Phase 3 – Kitchen Simulation (Dependent)**
+6. **Kitchen Simulation Endpoints:**  
+   - Fetch Pending Kitchen Tasks (`GET /api/kitchen/items`)  
+   - Start a Kitchen Task (`POST /api/kitchen/items/{id}/start`)  
+   - Process Ingredient Addition (`POST /api/kitchen/items/{id}/ingredient`)  
+   - Finish a Kitchen Task (`POST /api/kitchen/items/{id}/finish`)
+
+#### **Phase 4 – Order Completion & Notifications (Dependent)**
+7. **Finalize Order:**  
+   - Complete Order (`POST /api/orders/{id}/complete`)
+8. **Notifications:**  
+   - Fetch Notifications (`GET /api/notifications`)
+
+#### **Phase 5 – Optional Real-Time Enhancements**
+9. **Real-Time Endpoints:**  
+   - Real-Time Kitchen Updates (`GET /api/real-time/kitchen`)  
+   - Real-Time Order Updates (`GET /api/real-time/orders`)
+
+---
+
+## 3. API Endpoints
+
+Below is a complete list of API endpoints, including the returned JSON structure for each. They are classified as **Independent** and **Dependent** and then sorted in the recommended implementation order.
+
+---
+
+### 3.1. Independent API Endpoints
+
+#### **Authentication**
+
+1. **Customer Registration**  
+   - **Endpoint:** `POST /api/auth/register`  
+   - **Request JSON Example:**
+     ```json
+     {
+       "firebaseUid": "ABC123firebaseUID",
+       "email": "customer@example.com",
+       "name": "John Doe"
+     }
+     ```
+   - **Returned JSON Example (Success):**
+     ```json
+     {
+       "id": 1,
+       "firebaseUid": "ABC123firebaseUID",
+       "email": "customer@example.com",
+       "name": "John Doe",
+       "createdAt": "2025-02-05T12:00:00Z"
+     }
+     ```
+
+2. **Customer Login**  
+   - **Endpoint:** `POST /api/auth/login`  
+   - **Request JSON Example:**
+     ```json
+     {
+       "firebaseUid": "ABC123firebaseUID"
+     }
+     ```
+   - **Returned JSON Example (Success):**
+     ```json
+     {
+       "id": 1,
+       "firebaseUid": "ABC123firebaseUID",
+       "email": "customer@example.com",
+       "name": "John Doe"
+     }
+     ```
+
+3. **Admin Login**  
+   - **Endpoint:** `POST /api/admin/login`  
+   - **Request JSON Example:**
+     ```json
+     {
+       "email": "admin@example.com",
+       "password": "plaintextPassword"
+     }
+     ```
+   - **Returned JSON Example (Success):**
+     ```json
+     {
+       "id": 1,
+       "email": "admin@example.com",
+       "name": "Admin User",
+       "token": "admin-auth-token"
+     }
+     ```
+
+---
+
+#### **Catalog & Management**
+
+4. **List Dishes (Mobile)**
+   - **Endpoint:** `GET /api/dishes`
+   - **Returned JSON Example:**
+     ```json
+     [
+       {
+         "id": 1,
+         "name": "Burger",
+         "price": "5.99",
+         "cookingDuration": 300,
+         "createdAt": "2025-02-05T12:00:00Z"
+       },
+       {
+         "id": 2,
+         "name": "Pizza",
+         "price": "8.99",
+         "cookingDuration": 600,
+         "createdAt": "2025-02-05T12:05:00Z"
+       }
+     ]
+     ```
+
+5. **Admin Dish Management**
+   - **List Dishes:**  
+     - **Endpoint:** `GET /api/admin/dishes`
+   - **Create Dish:**  
+     - **Endpoint:** `POST /api/admin/dishes`
+     - **Request JSON Example:**
+       ```json
+       {
+         "name": "Salad",
+         "price": "4.50",
+         "cookingDuration": 180
+       }
+       ```
+     - **Returned JSON Example:**
+       ```json
+       {
+         "id": 3,
+         "name": "Salad",
+         "price": "4.50",
+         "cookingDuration": 180,
+         "createdAt": "2025-02-05T12:10:00Z"
+       }
+       ```
+   - **Update Dish:**  
+     - **Endpoint:** `PUT /api/admin/dishes/{id}`
+     - **Request JSON Example:**
+       ```json
+       {
+         "price": "5.00"
+       }
+       ```
+     - **Returned JSON Example:**
+       ```json
+       {
+         "id": 3,
+         "name": "Salad",
+         "price": "5.00",
+         "cookingDuration": 180,
+         "createdAt": "2025-02-05T12:10:00Z"
+       }
+       ```
+   - **Delete Dish:**  
+     - **Endpoint:** `DELETE /api/admin/dishes/{id}`
+     - **Returned JSON Example:**
+       ```json
+       {
+         "message": "Dish deleted successfully."
+       }
+       ```
+
+6. **List Ingredients (Admin)**
+   - **Endpoint:** `GET /api/admin/ingredients`
+   - **Returned JSON Example:**
+     ```json
+     [
+       {
+         "id": 1,
+         "name": "Bread",
+         "stockQuantity": 50,
+         "imageUrl": "http://example.com/images/bread.png",
+         "createdAt": "2025-02-05T11:55:00Z"
+       },
+       {
+         "id": 2,
+         "name": "Onion",
+         "stockQuantity": 100,
+         "imageUrl": "http://example.com/images/onion.png",
+         "createdAt": "2025-02-05T11:55:00Z"
+       }
+     ]
+     ```
+
+7. **List Users (Admin)**
+   - **Endpoint:** `GET /api/admin/users`
+   - **Returned JSON Example:**
+     ```json
+     [
+       {
+         "id": 1,
+         "firebaseUid": "ABC123firebaseUID",
+         "email": "customer@example.com",
+         "name": "John Doe",
+         "createdAt": "2025-02-05T12:00:00Z"
+       }
+     ]
+     ```
+
+---
+
+#### **Payment (Simulated)**
+
+8. **Record Payment**
+   - **Endpoint:** `POST /api/payments`
+   - **Request JSON Example:**
+     ```json
+     {
+       "orderId": 10,
+       "userId": 1,
+       "amount": "15.97"
+     }
+     ```
+   - **Returned JSON Example:**
+     ```json
+     {
+       "id": 5,
+       "order": 10,
+       "user": 1,
+       "amount": "15.97",
+       "createdAt": "2025-02-05T12:15:00Z"
+     }
+     ```
+
+---
+
+#### **Order Retrieval (Basic) & Admin Order Management**
+
+9. **Customer Order List**
+   - **Endpoint:** `GET /api/orders`
+   - **Returned JSON Example:**
+     ```json
+     [
+       {
+         "id": 10,
+         "user": {
+           "id": 1,
+           "name": "John Doe"
+         },
+         "totalAmount": "15.97",
+         "status": "paid",
+         "createdAt": "2025-02-05T12:15:00Z",
+         "updatedAt": "2025-02-05T12:15:00Z"
+       }
+     ]
+     ```
+
+10. **Order Details**
+    - **Endpoint:** `GET /api/orders/{id}`
+    - **Returned JSON Example:**
+      ```json
+      {
+        "id": 10,
+        "user": {
+          "id": 1,
+          "name": "John Doe"
+        },
+        "totalAmount": "15.97",
+        "status": "paid",
+        "orderItems": [
+          {
+            "dish": {
+              "id": 1,
+              "name": "Burger"
+            },
+            "quantity": 2
+          },
+          {
+            "dish": {
+              "id": 2,
+              "name": "Pizza"
+            },
+            "quantity": 1
+          }
+        ],
+        "createdAt": "2025-02-05T12:15:00Z",
+        "updatedAt": "2025-02-05T12:15:00Z"
+      }
+      ```
+
+11. **Admin Order Management**  
+    - **List Orders (Admin):**  
+      - **Endpoint:** `GET /api/admin/orders`
+      - **Returned JSON Example:**
+        ```json
+        [
+          {
+            "id": 10,
+            "user": {
+              "id": 1,
+              "name": "John Doe"
+            },
+            "totalAmount": "15.97",
+            "status": "paid",
+            "createdAt": "2025-02-05T12:15:00Z",
+            "updatedAt": "2025-02-05T12:15:00Z"
+          }
+        ]
+        ```
+    - **Update Order (Admin):**  
+      - **Endpoint:** `PUT /api/admin/orders/{id}`
+      - **Request JSON Example:**
+        ```json
+        {
+          "status": "in_preparation"
+        }
+        ```
+      - **Returned JSON Example:**
+        ```json
+        {
+          "id": 10,
+          "status": "in_preparation",
+          "updatedAt": "2025-02-05T12:20:00Z"
+        }
+        ```
+    - **Delete Order (Admin):**  
+      - **Endpoint:** `DELETE /api/admin/orders/{id}`
+      - **Returned JSON Example:**
+        ```json
+        {
+          "message": "Order deleted successfully."
+        }
+        ```
+    - **Order Statistics (Admin):**  
+      - **Endpoint:** `GET /api/admin/orders/stats`
+      - **Returned JSON Example:**
+        ```json
+        {
+          "totalSales": "159.70",
+          "completedOrders": 12
+        }
+        ```
+
+---
+
+### 3.2. Dependent API Endpoints
+
+These endpoints depend on prior functionality (orders, kitchen tasks, etc.).
+
+#### **Order Creation & Kitchen Task Generation**
+
+12. **Create Order**
+    - **Endpoint:** `POST /api/orders`
+    - **Request JSON Example:**
+      ```json
+      {
+        "userId": 1,
+        "orderItems": [
+          {
+            "dishId": 1,
+            "quantity": 2
+          },
+          {
+            "dishId": 2,
+            "quantity": 1
+          }
+        ]
+      }
+      ```
+    - **Returned JSON Example:**
+      ```json
+      {
+        "id": 10,
+        "user": {
+          "id": 1,
+          "name": "John Doe"
+        },
+        "totalAmount": "15.97",
+        "status": "paid",
+        "orderItems": [
+          {
+            "dish": {
+              "id": 1,
+              "name": "Burger"
+            },
+            "quantity": 2
+          },
+          {
+            "dish": {
+              "id": 2,
+              "name": "Pizza"
+            },
+            "quantity": 1
+          }
+        ],
+        "createdAt": "2025-02-05T12:15:00Z",
+        "updatedAt": "2025-02-05T12:15:00Z"
+      }
+      ```
+    - **Note:** After creating an order, the backend will generate corresponding `kitchen_item` records for each individual dish unit.
+
+---
+
+#### **Kitchen Simulation Endpoints**
+
+13. **Fetch Pending Kitchen Tasks**
+    - **Endpoint:** `GET /api/kitchen/items`
+    - **Returned JSON Example:**
+      ```json
+      [
+        {
+          "id": 101,
+          "order": 10,
+          "dish": {
+            "id": 1,
+            "name": "Burger"
+          },
+          "status": "waiting",
+          "startedAt": null,
+          "finishedAt": null
+        },
+        {
+          "id": 102,
+          "order": 10,
+          "dish": {
+            "id": 1,
+            "name": "Burger"
+          },
+          "status": "waiting",
+          "startedAt": null,
+          "finishedAt": null
+        },
+        {
+          "id": 103,
+          "order": 10,
+          "dish": {
+            "id": 2,
+            "name": "Pizza"
+          },
+          "status": "waiting",
+          "startedAt": null,
+          "finishedAt": null
+        }
+      ]
+      ```
+
+14. **Start Kitchen Task**
+    - **Endpoint:** `POST /api/kitchen/items/{id}/start`
+    - **Request JSON Example:**  
+      _(Typically no body is needed; the backend sets the start time.)_
+    - **Returned JSON Example:**
+      ```json
+      {
+        "id": 101,
+        "status": "cooking",
+        "startedAt": "2025-02-05T12:30:00Z"
+      }
+      ```
+
+15. **Process Ingredient Addition**
+    - **Endpoint:** `POST /api/kitchen/items/{id}/ingredient`
+    - **Request JSON Example:**
+      ```json
+      {
+        "ingredientId": 2
+      }
+      ```
+    - **Returned JSON Example (Correct Ingredient):**
+      ```json
+      {
+        "id": 101,
+        "ingredientAdded": true,
+        "remainingStock": 99
+      }
+      ```
+    - **Returned JSON Example (Incorrect Ingredient):**
+      ```json
+      {
+        "id": 101,
+        "ingredientAdded": false,
+        "message": "Incorrect ingredient. Try again."
+      }
+      ```
+
+16. **Finish Kitchen Task**
+    - **Endpoint:** `POST /api/kitchen/items/{id}/finish`
+    - **Request JSON Example:**  
+      _(No additional payload; the timer or chef action triggers completion.)_
+    - **Returned JSON Example:**
+      ```json
+      {
+        "id": 101,
+        "status": "cooked",
+        "finishedAt": "2025-02-05T12:35:00Z"
+      }
+      ```
+    - **Note:** The same endpoint (or a follow-up call) may later mark the task as `delivered` when the dish is moved to the delivery area.
+
+---
+
+#### **Order Completion & Notification**
+
+17. **Complete Order (Customer Pickup)**
+    - **Endpoint:** `POST /api/orders/{id}/complete`
+    - **Request JSON Example:**  
+      _(No body required – the endpoint is triggered by the “Get the food” button.)_
+    - **Returned JSON Example:**
+      ```json
+      {
+        "id": 10,
+        "status": "complete",
+        "updatedAt": "2025-02-05T12:45:00Z"
+      }
+      ```
+
+18. **Fetch Notifications**
+    - **Endpoint:** `GET /api/notifications`
+    - **Returned JSON Example:**
+      ```json
+      [
+        {
+          "id": 201,
+          "user": 1,
+          "message": "Your order #10 is ready for pickup.",
+          "status": "sent",
+          "createdAt": "2025-02-05T12:40:00Z"
+        }
+      ]
+      ```
+
+---
+
+### 3.3. Optional Real-Time Endpoints (if using WebSockets/Long Polling)
+
+19. **Real-Time Kitchen Updates**
+    - **Endpoint:** `GET /api/real-time/kitchen`
+    - **Purpose:** Clients can subscribe to this endpoint (or use a WebSocket channel) to receive live updates on kitchen task status changes.
+    - **Returned JSON Example:**
+      ```json
+      {
+        "update": "kitchen_item",
+        "data": {
+          "id": 101,
+          "status": "cooked",
+          "finishedAt": "2025-02-05T12:35:00Z"
+        }
+      }
+      ```
+
+20. **Real-Time Order Updates**
+    - **Endpoint:** `GET /api/real-time/orders`
+    - **Purpose:** Clients receive live order status updates.
+    - **Returned JSON Example:**
+      ```json
+      {
+        "update": "order",
+        "data": {
+          "id": 10,
+          "status": "ready",
+          "updatedAt": "2025-02-05T12:40:00Z"
+        }
+      }
+      ```
+
+---
+
+## Summary
+
+- **Database Tables:**  
+  Detailed above with each entity and its columns.
+- **Milestones & Scenarios:**  
+  Two views are provided:
+  - **Independent vs. Non-Independent:** Lists which scenarios can be built/tested in isolation and which depend on other functionality.
+  - **Implementation Order:** Step-by-step phases from authentication and catalog setup through order creation, kitchen simulation, and finally notifications.
+- **API Endpoints:**  
+  Every endpoint is detailed with its request and sample JSON response payload. They are grouped as independent (can be developed early) and dependent (require prior functionality) endpoints.
+
+This documentation serves as the single source of truth for our API and database design. Please review and discuss with the team for any further adjustments before implementation begins.
+
+Happy coding!
