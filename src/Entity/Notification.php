@@ -6,42 +6,52 @@ use App\Repository\NotificationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['notification:read']],
+    denormalizationContext: ['groups' => ['notification:write']]
+)]
 class Notification
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["notification:read", "notification:write"])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $utilisateur = null;
+    #[Groups(["notification:read", "notification:write"])]
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["notification:read", "notification:write"])]
     private ?string $message = null;
 
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
+    #[Groups(["notification:read", "notification:write"])]
     private ?\DateTimeInterface $createdAt = null;
+
+    private $utilisateur;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUtilisateur(): ?user
+    public function getUser(): ?User
     {
-        return $this->utilisateur;
+        return $this->user;
     }
 
-    public function setUtilisateur(?user $utilisateur): static
+    public function setUser(?User $user): static
     {
-        $this->utilisateur = $utilisateur;
+        $this->user = $user;
 
         return $this;
     }
@@ -75,10 +85,20 @@ class Notification
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function setUtilisateur($utilisateur): void
+    {
+        $this->utilisateur = $utilisateur;
+    }
+
+    public function getUtilisateur()
+    {
+        return $this->utilisateur;
     }
 }

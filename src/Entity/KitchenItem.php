@@ -7,22 +7,28 @@ use App\Repository\KitchenItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['kitchenItem:read']],
+    denormalizationContext: ['groups' => ['kitchenItem:write']]
+)]
 #[ORM\Entity(repositoryClass: KitchenItemRepository::class)]
 class KitchenItem
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["kitchenItem:read", "kitchenItem:write"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'kitchenItems')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Order $commande = null;
 
-    #[ORM\ManyToOne(inversedBy: 'kitchenItems')]
+    #[ORM\ManyToOne(targetEntity: Dish::class, inversedBy: 'kitchenItems')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["kitchenItem:read", "kitchenItem:write"])]
     private ?Dish $dish = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -33,6 +39,10 @@ class KitchenItem
 
     #[ORM\Column(type: 'string', enumType: StatusPlat::class, length: 20)]
     private ?string $status = null;
+
+    #[ORM\Column]
+    #[Groups(["kitchenItem:read", "kitchenItem:write"])]
+    private ?int $quantity = null;
 
     public function getId(): ?int
     {
@@ -51,12 +61,12 @@ class KitchenItem
         return $this;
     }
 
-    public function getDish(): ?dish
+    public function getDish(): ?Dish
     {
         return $this->dish;
     }
 
-    public function setDish(?dish $dish): static
+    public function setDish(?Dish $dish): static
     {
         $this->dish = $dish;
 
@@ -95,6 +105,18 @@ class KitchenItem
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }

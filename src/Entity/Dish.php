@@ -20,6 +20,7 @@ class Dish
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["dish:read", "dish:write"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -49,12 +50,14 @@ class Dish
      * @var Collection<int, OrderItem>
      */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'dish')]
+    #[Groups(["dish:read", "dish:write"])]
     private Collection $orderItems;
 
     /**
      * @var Collection<int, KitchenItem>
      */
     #[ORM\OneToMany(targetEntity: KitchenItem::class, mappedBy: 'dish')]
+    #[Groups(["dish:read", "dish:write"])]
     private Collection $kitchenItems;
 
     public function __construct()
@@ -110,7 +113,7 @@ class Dish
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
 

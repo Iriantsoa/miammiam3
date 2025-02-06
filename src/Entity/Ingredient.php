@@ -9,33 +9,43 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: IngredientRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['ingredient:read']],
+    denormalizationContext: ['groups' => ['ingredient:write']]
+)]
 class Ingredient
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[ApiProperty(identifier: true)]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private ?int $stockQuantity = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private ?\DateTimeInterface $createdAt = null;
 
     /**
      * @var Collection<int, DishIngredient>
      */
     #[ORM\OneToMany(targetEntity: DishIngredient::class, mappedBy: 'ingredient')]
+    #[Groups(["ingredient:read", "ingredient:write"])]
     private Collection $dishIngredients;
 
     public function __construct()
@@ -86,7 +96,7 @@ class Ingredient
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;

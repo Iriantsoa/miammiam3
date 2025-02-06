@@ -6,26 +6,35 @@ use App\Repository\AdminRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AdminRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['admin:read']],
+    denormalizationContext: ['groups' => ['admin:write']]
+)]
 class Admin
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["admin:read", "admin:write"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
+    #[Groups(["admin:read", "admin:write"])]
+    private ?string $username = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["admin:read", "admin:write"])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    #[Groups(["admin:read", "admin:write"])]
+    private ?string $email = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
+    #[Groups(["admin:read", "admin:write"])]
     private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int
@@ -33,15 +42,14 @@ class Admin
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getUsername(): ?string
     {
-        return $this->email;
+        return $this->username;
     }
 
-    public function setEmail(string $email): static
+    public function setUsername(string $username): static
     {
-        $this->email = $email;
-
+        $this->username = $username;
         return $this;
     }
 
@@ -53,19 +61,17 @@ class Admin
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    public function getName(): ?string
+    public function getEmail(): ?string
     {
-        return $this->name;
+        return $this->email;
     }
 
-    public function setName(string $name): static
+    public function setEmail(string $email): static
     {
-        $this->name = $name;
-
+        $this->email = $email;
         return $this;
     }
 
@@ -74,10 +80,9 @@ class Admin
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 }

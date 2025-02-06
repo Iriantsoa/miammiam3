@@ -17,59 +17,60 @@ class DishIngredient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'dishIngredients')]
+    #[ORM\ManyToOne(targetEntity: Dish::class, inversedBy: 'dishIngredients')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['dishIngredient:read', 'dishIngredient:write', 'dish:write'])]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?Dish $dish = null;
 
-    #[ORM\ManyToOne(inversedBy: 'dishIngredients')]
+    #[ORM\ManyToOne(targetEntity: Ingredient::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['dishIngredient:read', 'dishIngredient:write', 'dish:write'])]
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
     private ?Ingredient $ingredient = null;
 
     #[ORM\Column]
-    #[Groups(['dishIngredient:read', 'dishIngredient:write', 'dish:write'])]
-    private ?int $quantityRequired = null;
+    #[Groups(["dishIngredient:read", "dishIngredient:write"])]
+    private ?int $quantity = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDish(): ?dish
+    public function getDish(): ?Dish
     {
         return $this->dish;
     }
 
-    public function setDish(?dish $dish): static
+    public function setDish(?Dish $dish): static
     {
         $this->dish = $dish;
 
         return $this;
     }
 
-    public function getIngredient(): ?ingredient
+    public function getIngredient(): ?Ingredient
     {
         return $this->ingredient;
     }
 
-    public function setIngredient(?ingredient $ingredient): static
+    public function setIngredient(?Ingredient $ingredient): static
     {
         $this->ingredient = $ingredient;
 
         return $this;
     }
 
-    public function getQuantityRequired(): ?int
+    public function getQuantity(): ?int
     {
-        return $this->quantityRequired;
+        return $this->quantity;
     }
 
-    public function setQuantityRequired(int $quantityRequired): static
+    public function setQuantity(int $quantity): static
     {
-        $this->quantityRequired = $quantityRequired;
+        $this->quantity = $quantity;
 
         return $this;
     }
