@@ -22,11 +22,11 @@ class Ingredient
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[ApiProperty(identifier: true)]
-    #[Groups(["ingredient:read", "ingredient:write"])]
+    #[Groups(["ingredient:read", "ingredient:write", "dish:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["ingredient:read", "ingredient:write"])]
+    #[Groups(["ingredient:read", "ingredient:write", "dish:read"])]
     private ?string $name = null;
 
     #[ORM\Column]
