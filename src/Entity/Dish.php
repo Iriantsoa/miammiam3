@@ -23,15 +23,19 @@ class Dish
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["dish:read", "dish:write"])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[Groups(["dish:read", "dish:write"])]
     private ?string $price = null;
 
     #[ORM\Column]
+    #[Groups(["dish:read", "dish:write"])]
     private ?int $cookingDuration = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
+    #[Groups(["dish:read", "dish:write"])]
     private ?\DateTimeInterface $createdAt = null;
 
     /**
