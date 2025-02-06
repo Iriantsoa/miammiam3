@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\Status;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -21,7 +22,7 @@ class Order
 
     #[ORM\ManyToOne(inversedBy: 'ordersUser')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $utilisateur = null;
+    private ?User $utilisateur = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
     private ?string $totalAmount = null;

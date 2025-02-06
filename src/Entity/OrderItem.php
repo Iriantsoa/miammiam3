@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\OrderItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
 class OrderItem
@@ -16,11 +17,11 @@ class OrderItem
 
     #[ORM\ManyToOne(inversedBy: 'orderItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?order $commande = null;
+    private ?Order $commande = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?dish $dish = null;
+    private ?Dish $dish = null;
 
     #[ORM\Column]
     private ?int $quantity = null;

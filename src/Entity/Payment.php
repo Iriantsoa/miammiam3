@@ -6,6 +6,7 @@ use App\Repository\PaymentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
 class Payment
@@ -17,11 +18,11 @@ class Payment
 
     #[ORM\ManyToOne(inversedBy: 'payments')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?order $commande = null;
+    private ?Order $commande = null;
 
     #[ORM\ManyToOne(inversedBy: 'payments')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $utilisateur = null;
+    private ?User $utilisateur = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
     private ?string $amount = null;

@@ -7,6 +7,7 @@ use App\Repository\KitchenItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: KitchenItemRepository::class)]
 class KitchenItem
@@ -18,11 +19,11 @@ class KitchenItem
 
     #[ORM\ManyToOne(inversedBy: 'kitchenItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?order $commande = null;
+    private ?Order $commande = null;
 
     #[ORM\ManyToOne(inversedBy: 'kitchenItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?dish $dish = null;
+    private ?Dish $dish = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $startedAt = null;

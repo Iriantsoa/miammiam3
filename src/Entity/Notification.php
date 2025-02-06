@@ -6,6 +6,7 @@ use App\Repository\NotificationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 class Notification
@@ -17,7 +18,7 @@ class Notification
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $utilisateur = null;
+    private ?User $utilisateur = null;
 
     #[ORM\Column(length: 255)]
     private ?string $message = null;

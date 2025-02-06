@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\DishIngredientRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+
 #[ApiResource]
 #[ORM\Entity(repositoryClass: DishIngredientRepository::class)]
 class DishIngredient
@@ -16,11 +17,11 @@ class DishIngredient
 
     #[ORM\ManyToOne(inversedBy: 'dishIngredients')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?dish $dish = null;
+    private ?Dish $dish = null;
 
     #[ORM\ManyToOne(inversedBy: 'dishIngredients')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ingredient $ingredient = null;
+    private ?Ingredient $ingredient = null;
 
     #[ORM\Column]
     private ?int $quantityRequired = null;
