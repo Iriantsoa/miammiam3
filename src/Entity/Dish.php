@@ -27,7 +27,7 @@ class Dish
     #[Groups(["dish:read", "dish:write"])]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     #[Groups(["dish:read", "dish:write"])]
     private ?string $price = null;
 
@@ -35,14 +35,14 @@ class Dish
     #[Groups(["dish:read", "dish:write"])]
     private ?int $cookingDuration = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
     #[Groups(["dish:read", "dish:write"])]
     private ?\DateTimeInterface $createdAt = null;
 
     /**
      * @var Collection<int, DishIngredient>
      */
-    #[ORM\OneToMany(mappedBy: "dish", targetEntity: DishIngredient::class, cascade: ["persist"])]
+    #[ORM\OneToMany(mappedBy: "dish", targetEntity: DishIngredient::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     #[Groups(["dish:read", "dish:write"])]
     private Collection $dishIngredients;
 
