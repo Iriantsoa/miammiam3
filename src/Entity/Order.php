@@ -31,9 +31,11 @@ class Order
     private ?User $utilisateur = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[Groups(["order:read", "order:write"])]
     private ?string $totalAmount = null;
 
     #[ORM\Column(type: 'string', enumType: Status::class, length: 20)]
+    #[Groups(["order:read", "order:write"])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ["default" => "CURRENT_TIMESTAMP"], nullable: true)]
