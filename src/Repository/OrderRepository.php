@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Order;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @extends ServiceEntityRepository<Order>
@@ -14,6 +15,16 @@ class OrderRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
+    }
+
+    public function getTotalPriceOfCompletedOrders(): float
+    {
+        $qb = $this->createQueryBuilder('o')
+            ->select('SUM(o.totalAmount)')
+            ->where('o.status = :status')
+            ->setParameter('status', 'paid');
+
+        return (float) $qb->getQuery()->getSingleScalarResult();
     }
 
 //    /**
