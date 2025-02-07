@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Enum\Status;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -30,7 +29,7 @@ class Order
     #[Groups(["order:read", "order:write"])]
     private ?User $utilisateur = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
     #[Groups(["order:read", "order:write"])]
     private ?string $totalAmount = null;
 
@@ -48,7 +47,7 @@ class Order
     /**
      * @var Collection<int, OrderItem>
      */
-    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'commande', cascade: ["persist"])]
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class, cascade: ['persist'])]
     #[Groups(["order:read", "order:write"])]
     private Collection $orderItems;
 
@@ -63,6 +62,7 @@ class Order
      * @var Collection<int, KitchenItem>
      */
     #[ORM\OneToMany(targetEntity: KitchenItem::class, mappedBy: 'commande')]
+    #[Groups(["order:read", "order:write"])]
     private Collection $kitchenItems;
 
     public function __construct()
