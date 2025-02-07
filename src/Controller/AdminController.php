@@ -24,7 +24,7 @@ class AdminController extends AbstractController
 
         $admin = $entityManager->getRepository(Admin::class)->findOneBy(['username' => $username]);
 
-        if (!$admin || !password_verify($password, $admin->getPassword())) {
+        if (!$admin || $password !== $admin->getPassword()) {
             return new JsonResponse(['error' => 'Invalid credentials'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
