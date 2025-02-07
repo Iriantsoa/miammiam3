@@ -22,7 +22,7 @@ class OrderController extends AbstractController
         return $this->json($orders, JsonResponse::HTTP_OK, [], ['groups' => 'order:read']);
     }
 
-    #[Route('/api/orders/total-complete', name: 'total_complete_orders', methods: ['GET'])]
+    #[Route('/api/orders/total_complete', name: 'total_complete_orders', methods: ['GET'])]
     public function getTotalCompleteOrders(OrderRepository $orderRepository): JsonResponse
     {
         $totalPrice = $orderRepository->getTotalPriceOfCompletedOrders();
