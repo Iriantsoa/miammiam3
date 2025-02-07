@@ -48,7 +48,7 @@ class Order
     /**
      * @var Collection<int, OrderItem>
      */
-    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'commande')]
+    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'commande', cascade: ["persist"])]
     #[Groups(["order:read", "order:write"])]
     private Collection $orderItems;
 
