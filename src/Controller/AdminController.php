@@ -7,13 +7,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminController extends AbstractController
 {
     #[Route('/api/admin/login', name: 'admin_login', methods: ['POST'])]
-    public function login(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordEncoder): JsonResponse
+    public function login(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $username = $data['username'] ?? null;
@@ -25,7 +24,7 @@ class AdminController extends AbstractController
 
         $admin = $entityManager->getRepository(Admin::class)->findOneBy(['username' => $username]);
 
-        if (!$admin || !$passwordEncoder->isPasswordValid($admin, $password)) {
+        if (!$admin || !password_verify($password, $admin->getPassword())) {
             return new JsonResponse(['error' => 'Invalid credentials'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
