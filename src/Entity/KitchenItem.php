@@ -24,6 +24,7 @@ class KitchenItem
 
     #[ORM\ManyToOne(inversedBy: 'kitchenItems')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["kitchenItem:read", "kitchenItem:write"])]
     private ?Order $commande = null;
 
     #[ORM\ManyToOne(targetEntity: Dish::class, inversedBy: 'kitchenItems')]
@@ -38,6 +39,7 @@ class KitchenItem
     private ?\DateTimeInterface $finishedAt = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(["kitchenItem:read", "kitchenItem:write"])]
     private ?string $status = null;
 
     #[ORM\Column]
