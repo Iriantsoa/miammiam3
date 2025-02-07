@@ -37,7 +37,7 @@ class KitchenItem
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $finishedAt = null;
 
-    #[ORM\Column(type: 'string', enumType: StatusPlat::class, length: 20)]
+    #[ORM\Column(length: 20)]
     private ?string $status = null;
 
     #[ORM\Column]

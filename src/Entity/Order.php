@@ -34,7 +34,7 @@ class Order
     #[Groups(["order:read", "order:write"])]
     private ?string $totalAmount = null;
 
-    #[ORM\Column(type: 'string', enumType: Status::class, length: 20)]
+    #[ORM\Column(length: 20)]
     #[Groups(["order:read", "order:write"])]
     private ?string $status = null;
 
